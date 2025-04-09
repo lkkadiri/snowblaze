@@ -10,6 +10,31 @@
   }
 }
 
+/* Add bottom menu styles */
+footer.fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f0f0f0;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+footer.fixed button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #333;
+  text-decoration: none;
+}
+
+footer.fixed button:hover {
+  color: #007bff;
+}
+
 /* Blinking animation for active crew markers */
 @keyframes blink {
   0%, 100% { opacity: 1; }

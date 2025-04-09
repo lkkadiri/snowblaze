@@ -147,21 +147,27 @@ function Dashboard() {
           <> {/* Fragment for admin buttons */}
             <button 
               onClick={() => navigate('/organization')}
-              className="btn"
+              className="btn hidden md:inline-block"
             >
               Manage Organization
             </button>
             <button 
               onClick={() => navigate('/crew-tracking')}
-              className="btn"
+              className="btn hidden md:inline-block"
             >
               Crew Tracking
             </button>
             <button 
               onClick={() => navigate('/locations')}
-              className="btn"
+              className="btn hidden md:inline-block"
             >
               Manage Locations
+            </button>
+            <button
+              onClick={() => navigate('/manage-assignments')} // Add button for managing assignments
+              className="btn hidden md:inline-block"
+            >
+              Manage Assignments
             </button>
           </>
         ) : (

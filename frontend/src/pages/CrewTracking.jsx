@@ -5,6 +5,26 @@ import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { supabase } from '../services/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
+// Simple hash function to generate a color from a string (e.g., user ID)
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    // Ensure brightness/saturation by avoiding very dark/light colors if needed
+    // For simplicity, just generate the hex code directly here
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  // Basic check to avoid pure white/black if hash is 0 or similar
+  if (color === '#000000') return '#808080'; // Default to gray
+  if (color === '#ffffff') return '#808080';
+  return color;
+}
+
+
 const mapContainerStyle = {
   width: '100%',
   height: '600px'
@@ -251,13 +271,13 @@ function CrewTracking() {
                     // Re-enable custom icon logic now that isLoaded works
                     icon={
                       isCrewActive(member) // isLoaded is checked before rendering GoogleMap
-                        ? {
+                        ? { // Use generated color for active members
                             path: window.google.maps.SymbolPath.CIRCLE,
                             scale: 8,
-                            fillColor: '#00FF00', // Bright Green
+                            fillColor: stringToColor(member.id), // Generate color from ID
                             fillOpacity: 1,
                             strokeWeight: 1,
-                            strokeColor: '#000000'
+                            strokeColor: '#000000' // Keep black outline for contrast
                           }
                         : undefined // Use default marker if inactive or selected
                     }

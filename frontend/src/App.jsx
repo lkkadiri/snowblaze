@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from './services/supabaseClient';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ThemeToggle from './components/ThemeToggle';
+import BottomNavAdmin from './components/BottomNavAdmin';
 
 // Import pages
 import Login from './pages/Login';
@@ -13,7 +14,8 @@ import Dashboard from './pages/Dashboard';
 import CrewTracking from './pages/CrewTracking';
 import OrganizationManagement from './pages/OrganizationManagement';
 import LocationManagement from './pages/LocationManagement';
-import MyAssignments from './pages/MyAssignments'; // Import the new component
+import MyAssignments from './pages/MyAssignments';
+import AssignmentManagement from './pages/AssignmentManagement'; // Import the new management component
 
 function App() {
   const [user, setUser] = useState(null);
@@ -70,6 +72,7 @@ function App() {
           <div className="fixed top-4 right-4 z-50">
             <ThemeToggle />
           </div>
+          {user && user.user_metadata?.role === 'admin' && <BottomNavAdmin />}
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
@@ -109,10 +112,18 @@ function App() {
                 <AdminRoute>
                   <LocationManagement />
                 </AdminRoute>
-              } 
+              }
+            />
+            <Route
+              path="/manage-assignments" // Add route for assignment management
+              element={
+                <AdminRoute>
+                  <AssignmentManagement />
+                </AdminRoute>
+              }
             />
              {/* Route for Crew Member Assignments */}
-             <Route 
+             <Route
               path="/my-assignments" 
               element={
                 <ProtectedRoute> 

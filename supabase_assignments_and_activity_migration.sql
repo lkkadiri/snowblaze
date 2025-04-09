@@ -115,4 +115,30 @@ FOR EACH ROW EXECUTE FUNCTION public.set_assignment_organization();
 COMMENT ON COLUMN public.crew_members.last_active_at IS 'Timestamp of the last known activity for the crew member (e.g., location update, login)';
 COMMENT ON TABLE public.crew_assignments IS 'Tracks assignments of locations (jobs/sites) to crew members.';
 
+-- Add RLS Policy for updating organization name
+-- Policy: Allow admins to update their own organization name
+DROP POLICY IF EXISTS "Admins can update their organization" ON public.organizations;
+CREATE POLICY "Admins can update their organization"
+ON public.organizations FOR UPDATE
+TO authenticated
+USING (
+    id = (SELECT organization_id FROM public.crew_members WHERE user_id = auth.uid() LIMIT 1)
+    AND
+    (SELECT role FROM public.crew_members WHERE user_id = auth.uid() LIMIT 1) = 'admin'
+)
+WITH CHECK (
+    id = (SELECT organization_id FROM public.crew_members WHERE user_id = auth.uid() LIMIT 1)
+);
+
+-- Refine RLS SELECT Policy for organizations
+-- Policy: Allow authenticated users to view their own organization
+DROP POLICY IF EXISTS "Users can view their organization" ON public.organizations;
+CREATE POLICY "Users can view their organization"
+ON public.organizations FOR SELECT
+TO authenticated
+USING (
+    id = (SELECT organization_id FROM public.crew_members WHERE user_id = auth.uid() LIMIT 1)
+);
+
+
 -- Note: Apply this migration to your Supabase project.

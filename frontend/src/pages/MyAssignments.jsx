@@ -361,36 +361,41 @@ function MyAssignments() {
                 zoom={selectedLocation ? 15 : (currentUserLocation ? 13 : 10)}
                 onLoad={onMapLoad}
               >
-                {/* Show Assigned Locations */}
-                {assignedLocations.map((location) => (
-                  location.latitude && location.longitude && (
-                    <Marker
-                      key={location.assignment_id} // Use assignment ID for key
-                      position={{
-                        lat: location.latitude,
-                        lng: location.longitude
-                      }}
-                      title={`${location.name} - ${location.address}`}
-                      onClick={() => handleLocationSelect(location)}
-                      // Use a green dot icon for assigned locations
-                      icon={{
-                        path: window.google.maps.SymbolPath.CIRCLE,
-                        scale: 7, // Slightly smaller than admin's active dot
-                        fillColor: '#008000', // Darker Green
-                        fillOpacity: 0.9,
-                        strokeWeight: 1,
-                        strokeColor: '#FFFFFF'
-                      }}
-                    />
-                  )
-                ))}
+                {/* Don't render assigned location markers directly anymore, will render based on route */}
+                {/* {assignedLocations.map((location) => ... )} */}
 
-                {/* Render the calculated route */}
+                {/* Render the calculated route, suppressing default markers */}
                 {directionsResponse && (
-                  <DirectionsRenderer directions={directionsResponse} />
+                  <DirectionsRenderer
+                    directions={directionsResponse}
+                    options={{
+                      suppressMarkers: true, // Hide default A, B, C markers
+                      polylineOptions: { // Optional: Style the route line
+                        strokeColor: '#0000FF', // Change to Blue
+                        strokeOpacity: 0.8,
+                        strokeWeight: 4
+                      }
+                    }}
+                  />
                 )}
 
-                {/* Show Current Location - Keep this marker */}
+                 {/* Render Custom Markers based on the route */}
+                 {isLoaded && directionsResponse && directionsResponse.routes && directionsResponse.routes.length > 0 && (
+                   directionsResponse.routes[0].legs.map((leg, index) => (
+                     // Marker for the destination of each leg (A, B, C...)
+                     <Marker
+                      key={`leg-${index}`}
+                      position={leg.end_location} // Position is the end of the leg
+                      label={String.fromCharCode(65 + index)} // A, B, C...
+                      title={`Stop ${String.fromCharCode(65 + index)}: ${leg.end_address}`} // Show address and label on hover
+                      // Use default marker appearance for route points
+                    />
+                  ))
+                )}
+                {/* Log the legs to see the order */}
+                {isLoaded && directionsResponse && console.log("Route Legs:", directionsResponse?.routes?.[0]?.legs)}
+
+                {/* Show Current Location - Keep this marker (Gold Star) */}
                 {currentUserLocation && (
                    <Marker
                       key="currentUser"
