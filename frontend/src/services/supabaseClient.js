@@ -11,6 +11,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    redirectTo: `${siteUrl}/set-password`
+    // Don't set a global redirectTo as it affects all auth operations
+    // Instead, set it specifically for each auth operation that needs it
   }
 });

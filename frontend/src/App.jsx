@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from './services/supabaseClient';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ThemeToggle from './components/ThemeToggle';
 
 // Import pages
 import Login from './pages/Login';
@@ -10,6 +12,8 @@ import SetPassword from './pages/SetPassword';
 import Dashboard from './pages/Dashboard';
 import CrewTracking from './pages/CrewTracking';
 import OrganizationManagement from './pages/OrganizationManagement';
+import LocationManagement from './pages/LocationManagement';
+import MyAssignments from './pages/MyAssignments'; // Import the new component
 
 function App() {
   const [user, setUser] = useState(null);
@@ -60,55 +64,77 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/set-password" element={<SetPassword />} />
-          
-          {/* Protected Routes */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Admin Routes */}
-          <Route 
-            path="/crew-tracking" 
-            element={
-              <AdminRoute>
-                <CrewTracking />
-              </AdminRoute>
-            } 
-          />
-          <Route 
-            path="/organization" 
-            element={
-              <AdminRoute>
-                <OrganizationManagement />
-              </AdminRoute>
-            } 
-          />
+    <ThemeProvider>
+      <Router>
+        <div className="min-h-screen bg-primary-light dark:bg-primary-dark">
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggle />
+          </div>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/set-password" element={<SetPassword />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes */}
+            <Route 
+              path="/crew-tracking" 
+              element={
+                <AdminRoute>
+                  <CrewTracking />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/organization" 
+              element={
+                <AdminRoute>
+                  <OrganizationManagement />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/locations" 
+              element={
+                <AdminRoute>
+                  <LocationManagement />
+                </AdminRoute>
+              } 
+            />
+             {/* Route for Crew Member Assignments */}
+             <Route 
+              path="/my-assignments" 
+              element={
+                <ProtectedRoute> 
+                  <MyAssignments />
+                </ProtectedRoute>
+              } 
+            />
 
-          {/* Default Redirect */}
-          <Route 
-            path="/" 
-            element={
-              <Navigate 
-                to={user ? "/dashboard" : "/login"} 
-                replace 
-              />
-            } 
-          />
-        </Routes>
-      </div>
-    </Router>
+            {/* Default Redirect */}
+            <Route 
+              path="/" 
+              element={
+                <Navigate 
+                  to={user ? "/dashboard" : "/login"} 
+                  replace 
+                />
+              } 
+            />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

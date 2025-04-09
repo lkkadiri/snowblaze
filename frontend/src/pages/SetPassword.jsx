@@ -9,18 +9,47 @@ function SetPassword() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation(); // No longer needed for manual parsing
 
-  // Extract token from URL
+  // Use onAuthStateChange to detect the session after redirect
   useEffect(() => {
-    // The URL will contain a hash fragment like #access_token=xxx&type=recovery
-    const hashParams = new URLSearchParams(location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
-    
-    if (!accessToken) {
-      setError('Invalid or missing access token. Please check your email link.');
-    }
-  }, [location]);
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // This listener triggers when the component mounts and Supabase detects
+      // session info in the URL fragment (#access_token=...)
+      if (event === 'SIGNED_IN') {
+        // Session is automatically handled by the Supabase client library
+        console.log('Session established via onAuthStateChange');
+        setError(''); // Clear any potential initial error
+      } else if (event === 'PASSWORD_RECOVERY') {
+        // This event might also be triggered depending on the flow
+        console.log('Password recovery event detected');
+        setError(''); 
+      } else if (event === 'SIGNED_OUT') {
+        // If somehow signed out, redirect
+        navigate('/login');
+      }
+      // We don't necessarily need to check for !session here, 
+      // as the updateUser call later will fail if not authenticated.
+      // If no SIGNED_IN event occurs after redirect, updateUser will likely fail.
+    });
+
+    // Check initial session state in case the listener doesn't fire immediately
+    // or if the user navigates directly to the page with an existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        // If there's no session shortly after load, and onAuthStateChange didn't sign in,
+        // it implies the token was invalid or missing from the URL fragment.
+        // We might set an error here, but let's rely on the updateUser failure for now.
+        console.log('No initial session found.');
+      }
+    });
+
+    // Cleanup listener on unmount
+    return () => {
+      // The unsubscribe function is nested in the returned data object
+      authListener?.data?.subscription?.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleSetPassword = async (e) => {
     e.preventDefault();
@@ -41,20 +70,20 @@ function SetPassword() {
     }
 
     try {
-      // Extract token from URL
-      const hashParams = new URLSearchParams(location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      
-      if (!accessToken) {
-        throw new Error('Invalid or missing access token');
+      // The onAuthStateChange listener should have established the session.
+      // If not, this updateUser call will fail with an auth error.
+      const { data: { user }, error: sessionError } = await supabase.auth.getUser();
+
+      if (sessionError || !user) {
+        throw new Error('Authentication error. Please try the link again or request a new one.');
       }
 
       // Update the user's password
-      const { error } = await supabase.auth.updateUser({
+      const { error: updateError } = await supabase.auth.updateUser({
         password: password
       });
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       setSuccess(true);
       setTimeout(() => {

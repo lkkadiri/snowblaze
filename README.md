@@ -1,94 +1,99 @@
-# Snowblaze - Snow Ploughing Route Management System
+# Snowblaze Crew Management System
 
-## Overview
-Snowblaze is a comprehensive crew and route management application for snow ploughing organizations, providing real-time crew tracking and organizational management.
+A system for managing snow removal crews, tracking their locations, and organizing work assignments.
 
-## Technologies
-- Frontend: React, Vite, Tailwind CSS
-- Backend: Python, Flask
-- Database: Supabase
-- Maps: Google Maps React
+## Project Structure
 
-## Prerequisites
-- Node.js (v18+)
-- Python (v3.10+)
-- Supabase Account
-- Google Maps API Key
+- **frontend/**: React application for the user interface
+- **backend/**: Flask API for server-side operations
+- **supabase_schema.sql**: Database schema for Supabase
 
-## Setup
+## Setup Instructions
 
-### Frontend Setup
-1. Navigate to frontend directory
+### Frontend
+
+1. Navigate to the frontend directory:
+   ```
+   cd frontend
+   ```
+
 2. Install dependencies:
    ```
    npm install
    ```
-3. Create `.env` file with:
-   ```
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-   ```
-4. Run development server:
+
+3. Create a `.env` file based on `.env.example` with your Supabase credentials.
+
+4. Start the development server:
    ```
    npm run dev
    ```
 
-### Backend Setup
-1. Navigate to backend directory
-2. Create virtual environment:
+### Backend
+
+1. Navigate to the backend directory:
    ```
-   python3 -m venv venv
-   source venv/bin/activate
+   cd backend
    ```
+
+2. Create a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
 3. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
-4. Create `.env` file with:
+
+4. Create a `.env` file based on `.env.example` with your Supabase credentials.
+
+5. Start the Flask server:
    ```
-   SUPABASE_URL=your_supabase_project_url
-   SUPABASE_KEY=your_supabase_service_role_key
-   ```
-5. Run Flask server:
-   ```
-   python app.py
+   flask run
    ```
 
-## Supabase Database Schema
+### Database
 
-### Tables
-1. `organizations`
-   - `id`: UUID (Primary Key)
-   - `name`: Text
-   - `created_at`: Timestamp
-
-2. `crew_members`
-   - `id`: UUID (Primary Key)
-   - `name`: Text
-   - `email`: Text
-   - `role`: Text (crew, driver, supervisor)
-   - `organization_id`: UUID (Foreign Key to organizations)
-   - `user_id`: UUID (Supabase Auth User ID)
-
-3. `crew_locations`
-   - `id`: UUID (Primary Key)
-   - `crew_member_id`: UUID (Foreign Key to crew_members)
-   - `latitude`: Numeric
-   - `longitude`: Numeric
-   - `timestamp`: Timestamp
+1. Run the `supabase_reset_schema.sql` script in your Supabase SQL Editor to set up the database schema.
 
 ## Features
-- User Authentication
-- Organization Management
-- Crew Member Management
-- Real-time Crew Location Tracking
-- Role-based Access Control
 
-## Deployment
-- Frontend: Vercel/Netlify
-- Backend: Heroku/Railway
-- Database: Supabase
+- **User Authentication**: Sign up, login, and password management
+- **Organization Management**: Create and manage organizations
+- **Crew Management**: Add, remove, and manage crew members
+- **Location Tracking**: Track crew member locations in real-time
+- **Role-Based Access Control**: Different permissions for admins, supervisors, drivers, and crew members
 
-## License
-MIT License
+## Recent Updates
+
+- Fixed infinite recursion issue in Supabase RLS policies
+- Added password setup flow for new crew members
+- Implemented backend API for user deletion
+- Improved error handling for user management operations
+
+## Troubleshooting
+
+### User Deletion Issues
+
+If you encounter issues with user deletion:
+
+1. Make sure the backend server is running:
+   ```
+   cd backend
+   flask run
+   ```
+
+2. Verify that the `SUPABASE_SERVICE_ROLE_KEY` is correctly set in `backend/.env`
+
+3. Run the test script to diagnose the issue:
+   ```
+   cd backend
+   python test_user_deletion.py
+   ```
+   (Remember to replace the placeholder user ID in the script with an actual user ID)
+
+4. Check the Supabase dashboard for any restrictions on user management
+
+Note: The frontend will still remove crew members from the organization even if the backend API fails to delete the user from Supabase Auth. This ensures that admins can still manage their organization's crew members.

@@ -1,3 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-light dark:bg-surface-dark text-gray-900 dark:text-gray-100 transition-colors duration-300;
+  }
+}
+
+/* Blinking animation for active crew markers */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Apply the animation to the label used as a workaround */
+/* Note: This targets the label within the marker structure. */
+/* Adjust selector if Google Maps API changes marker structure */
+.blinking-dot {
+  /* We can't directly animate the SVG icon fill easily without complex overlays */
+  /* This attempts to style the label, which might appear near the dot */
+  /* A more robust solution might involve custom overlays */
+  animation: blink 1.5s linear infinite;
+  /* Style the label itself if needed, e.g., make it invisible */
+   color: transparent; /* Hide the space character */
+   display: inline-block; /* Needed for animation? */
+   /* Add background or border if you want the label area to blink */
+   /* background-color: rgba(0, 255, 0, 0.5); */
+   /* border-radius: 50%; */
+}
+
+/* Ensure map labels don't interfere visually */
+.gm-style .gm-style-iw-t::after {
+  /* Optional: Style map info window tails if needed */
+}
+
+/* Custom scrollbar for modern look */
+::-webkit-scrollbar {
+  @apply w-2 bg-gray-200 dark:bg-gray-700;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@layer components {
+  /* Button styles for modern, futuristic look */
+  .btn {
+    @apply px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           bg-gray-600 text-white 
+           dark:bg-gray-700 dark:text-gray-100
+           hover:bg-gray-700 dark:hover:bg-gray-600;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-surface-light dark:bg-card-dark 
+           shadow-md dark:shadow-dark-lg rounded-lg 
+           border border-gray-200 dark:border-gray-700 
+           text-gray-900 dark:text-gray-100
+           transition-all duration-300;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-3 py-2 
+           bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-gray-100
+           border border-gray-300 dark:border-gray-600 
+           rounded-md 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 
+           transition-colors duration-300;
+  }
+}

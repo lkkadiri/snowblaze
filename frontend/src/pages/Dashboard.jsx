@@ -102,27 +102,27 @@ function Dashboard() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="card p-6">
           <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Role:</strong> {user.user_metadata?.role || 'Member'}</p>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="card p-6">
           <h2 className="text-xl font-semibold mb-4">Organization Details</h2>
           <p><strong>Name:</strong> {organization.name}</p>
           <p><strong>Crew Members:</strong> {crewMembers.length}</p>
         </div>
       </div>
 
-      <div className="mt-8 bg-white shadow rounded-lg p-6">
+      <div className="mt-8 card p-6">
         <h2 className="text-xl font-semibold mb-4">Crew Members</h2>
         {crewMembers.length === 0 ? (
           <p className="text-gray-500">No crew members added yet.</p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-100 text-left">
+              <tr className="bg-gray-100 text-left dark:bg-gray-700 dark:text-gray-200">
                 <th className="p-3">Name</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Role</th>
@@ -141,22 +141,41 @@ function Dashboard() {
         )}
       </div>
 
-      {user.user_metadata?.role === 'admin' && (
-        <div className="mt-6 flex space-x-4">
-          <button 
-            onClick={() => navigate('/organization')}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-          >
-            Manage Organization
-          </button>
-          <button 
-            onClick={() => navigate('/crew-tracking')}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-          >
-            Crew Tracking
-          </button>
-        </div>
-      )}
+      {/* Conditional Navigation Buttons */}
+      <div className="mt-6 flex space-x-4">
+        {user.user_metadata?.role === 'admin' ? (
+          <> {/* Fragment for admin buttons */}
+            <button 
+              onClick={() => navigate('/organization')}
+              className="btn"
+            >
+              Manage Organization
+            </button>
+            <button 
+              onClick={() => navigate('/crew-tracking')}
+              className="btn"
+            >
+              Crew Tracking
+            </button>
+            <button 
+              onClick={() => navigate('/locations')}
+              className="btn"
+            >
+              Manage Locations
+            </button>
+          </>
+        ) : (
+          <> {/* Fragment for non-admin buttons */}
+            <button 
+              onClick={() => navigate('/my-assignments')}
+              className="btn"
+            >
+              My Assignments
+            </button>
+            {/* Add other relevant buttons for crew members if needed */}
+          </>
+        )}
+      </div>
     </div>
   );
 }
