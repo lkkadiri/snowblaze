@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function OrganizationManagement() {
   const [organization, setOrganization] = useState(null);
+  const [organizationName, setOrganizationName] = useState('');
   const [crewMembers, setCrewMembers] = useState([]);
   const [newMember, setNewMember] = useState({
     name: '',
@@ -12,6 +13,7 @@ function OrganizationManagement() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,7 +21,7 @@ function OrganizationManagement() {
       try {
         // Get current user session
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
           navigate('/login');
           return;
@@ -35,6 +37,7 @@ function OrganizationManagement() {
         if (orgError) throw orgError;
 
         setOrganization(orgData);
+        setOrganizationName(orgData.name);
 
         // Fetch crew members
         const { data: crewData, error: crewError } = await supabase
@@ -55,6 +58,30 @@ function OrganizationManagement() {
 
     fetchOrgData();
   }, [navigate]);
+
+  const handleUpdateOrganizationName = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { data, error: updateError } = await supabase
+        .from('organizations')
+        .update({ name: organizationName })
+        .eq('id', organization.id)
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setOrganization(data);
+      setIsEditing(false);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddCrewMember = async (e) => {
     e.preventDefault();
@@ -161,7 +188,7 @@ function OrganizationManagement() {
       if (data.warning) {
         console.warn('Backend Warning:', data.warning);
         // Optionally display the warning to the user, e.g., using setError
-        setError(`Warning: ${data.warning}`); 
+        setError(`Warning: ${data.warning}`);
       }
 
       // Update local state on successful removal from backend
@@ -192,7 +219,7 @@ function OrganizationManagement() {
         <div className="text-center bg-red-100 dark:bg-red-900 p-6 rounded-lg">
           <h2 className="text-2xl text-red-600 dark:text-red-200 mb-4">Error Loading Organization</h2>
           <p className="text-red-500 dark:text-red-300">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
           >
@@ -207,14 +234,53 @@ function OrganizationManagement() {
     <div className="container mx-auto px-4 py-8 text-gray-900 dark:text-gray-200">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold dark:text-white">
-          {organization.name} - Organization Management
+          {isEditing ? (
+            <input
+              type="text"
+              value={organizationName}
+              onChange={(e) => setOrganizationName(e.target.value)}
+              className="px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
+            />
+          ) : (
+            organizationName
+          )}
+          {/* {organization.name} - Organization Management */}
         </h1>
-        <button 
-          onClick={() => navigate('/dashboard')}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 transition"
-        >
-          Back to Dashboard
-        </button>
+        <div className="flex items-center space-x-2">
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleUpdateOrganizationName}
+                disabled={loading}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition"
+              >
+                {loading ? 'Updating...' : 'Save'}
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setOrganizationName(organization?.name || '');
+                }}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 transition"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 transition"
+          >
+            Back to Dashboard
+          </button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -296,7 +362,7 @@ function OrganizationManagement() {
                     <td className="p-3">{member.email}</td>
                     <td className="p-3">{member.role}</td>
                     <td className="p-3">
-                      <button 
+                      <button
                         onClick={() => handleRemoveCrewMember(member.id)}
                         className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                       >
